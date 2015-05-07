@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd">
+
+	<!-- 自动扫描且只扫描@Controller -->
+	<context:component-scan base-package="com.ibm" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+	</context:component-scan>
+
+	<mvc:default-servlet-handler/>
+
+	<mvc:annotation-driven>
+		<mvc:message-converters register-defaults="true">
+			<!-- 将StringHttpMessageConverter的默认编码设为UTF-8 -->
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+		    	<constructor-arg value="UTF-8" />
+			</bean>
+			<!-- 将FastJsonHttpMessageConverter的默认格式化输出设为true -->
+			<bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="charset" value="utf-8"></property>
+				<property name="features">
+					<array value-type="com.alibaba.fastjson.serializer.SerializerFeature">
+						<value>DisableCircularReferenceDetect</value>
+						<value>WriteDateUseDateFormat</value>
+					</array>
+				</property>
+            </bean>
+  		</mvc:message-converters>
+		<mvc:argument-resolvers>
+			<bean class="com.ibm.cn.cdl.annotation.JsonParamResolver"></bean>
+		</mvc:argument-resolvers>
+	</mvc:annotation-driven>
+
+	
+	<!-- 添加拦截器 -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<bean id="webContentInterceptor" class="org.springframework.web.servlet.mvc.WebContentInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+	
+	<!-- AOP自动打开 -->
+	<aop:aspectj-autoproxy proxy-target-class="true"/>
+</beans>
